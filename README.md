@@ -51,7 +51,7 @@ sudo pacman -S lftp curl
 
 ## Configuration & Usage
 
-Open the backup script (`backup.sh`) in your text editor and modify the parameters in the **Configuration** section near the top of the file:
+Open the backup script (`RS_Dragonwilds_Backup.sh`) in your text editor and modify the parameters in the **Configuration** section near the top of the file:
 
 ```bash
 # -----------------------------

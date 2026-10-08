@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 # ============================================================
+# Version 1.0
 # Description:
 # This script connects via FTP to a remote RuneScape Dragonwilds
 # server and backs up save files to your local system.

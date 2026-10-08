@@ -1,6 +1,6 @@
 # RuneScape Dragonwilds Save Game Backup Script
 
-An automated Bash script designed to connect to a remote **RuneScape Dragonwilds** dedicated server via FTP, securely download the world save file, add a timestamp, and enforce a custom retention policy (auto-deleting old backups). If a backup fails, the script can optionally alert you via Telegram.
+An automated Bash script designed to connect to a remote **RuneScape Dragonwilds** dedicated server via FTP, securely download the world save file, add a timestamp, and enforce a custom retention policy (auto-deleting old backups). If a backup fails, the script can optionally alert you via Telegram, Discord, or both.
 
 ---
 
@@ -15,7 +15,7 @@ An automated Bash script designed to connect to a remote **RuneScape Dragonwilds
 - **Automated FTP Download:** Handles filenames with spaces or special characters safely.
 - **Verification:** Ensures the downloaded file exists and is not zero bytes before keeping it.
 - **Retention Management:** Automatically cleans up older backups, keeping only the specified number of recent files.
-- **Configurable Telegram Alerts:** Send instant error alerts directly to a Telegram chat using the Telegram Bot API (can be toggled on/off).
+- **Configurable Notifications:** Send instant failure alerts directly to a **Telegram** chat, a **Discord** channel, or both (disabled by default).
 - **Safety Checks:** Guarantees proper configuration and path sanitization before execution.
 
 ---
@@ -27,7 +27,7 @@ This script has been tested on **Debian 13**, but it will run on almost any Linu
 Ensure the following tools are installed on your host system:
 
 * **lftp** – For robust FTP client connections.
-* **curl** – For sending Telegram API notifications (required if Telegram alerts are enabled).
+* **curl** – For sending Telegram and Discord API notifications.
 
 ### Installing Dependencies
 
@@ -51,7 +51,7 @@ sudo pacman -S lftp curl
 
 ## Configuration & Usage
 
-Open the backup script (`RS_Dragonwilds_Backup.sh`) in your text editor and modify the parameters in the **Configuration** section near the top of the file:
+Open the backup script (`RS_dragonwilds_backup.sh`) in your text editor and modify the parameters in the **Configuration** section near the top of the file:
 
 ```bash
 # -----------------------------
@@ -74,29 +74,41 @@ LOCAL_PATH="gamebackups/Runescape-Dragonwilds/"          # Local folder path to 
 BACKUPS_TO_KEEP=20                                       # Number of recent backups to retain
 
 # Telegram Notifications
-USE_TELEGRAM="true"                                     # Set to "true" to enable, "false" to disable
+USE_TELEGRAM="false"                                    # Set to "true" to enable, "false" to disable
 TELEGRAM_BOT_TOKEN="REPLACE_WITH_BOT_TOKEN"             # Telegram Bot Token from @BotFather
 TELEGRAM_CHAT_ID="REPLACE_WITH_CHAT_ID"                 # Target Chat ID for alerts
+
+# Discord Notifications
+USE_DISCORD="false"                                     # Set to "true" to enable, "false" to disable
+DISCORD_WEBHOOK_URL="REPLACE_WITH_DISCORD_WEBHOOK_URL"  # Discord Channel Webhook URL
 ```
 
 ---
 
-## How to Set Up a Telegram Bot (Optional)
+## Setting Up Notifications (Optional)
 
-If `USE_TELEGRAM="true"` is set, you can receive failure notifications directly on your phone or desktop:
+### Setting Up Discord Notifications
+
+1. Open Discord and go to the server/channel where you want to receive backup failure alerts.
+2. Click the gear icon next to the channel name to open **Channel Settings**.
+3. Go to **Integrations** > **Webhooks** > **New Webhook**.
+4. Name your bot (e.g., `Backup Bot`), select the target channel, and click **Copy Webhook URL**.
+5. Set `USE_DISCORD="true"` in `RS_dragonwilds_backup.sh` and paste the copied URL into `DISCORD_WEBHOOK_URL`.
+
+---
+
+### Setting Up Telegram Notifications
 
 1. **Create a Bot:**
    - Open Telegram and search for [@BotFather](https://t.me/BotFather).
    - Send `/newbot` and follow the prompts to choose a name and username.
    - Copy the provided **HTTP API Token** and paste it into `TELEGRAM_BOT_TOKEN`.
-   - Read official instructions at the [Telegram Bot Father Guide](https://core.telegram.org/bots/features#botfather).
 
 2. **Get Your Chat ID:**
-   - Send a message to your new bot or add it to a group.
-   - Use a helper bot like [@userinfobot](https://t.me/userinfobot) or open `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates` in your browser to locate your `chat_id`.
-   - Paste this value into `TELEGRAM_CHAT_ID`.
-
-For more details, check out the [Telegram Bots Getting Started Guide](https://core.telegram.org/bots#launching-your-telegram-bot).
+   - Send a message to your new bot or add it to a group channel.
+   - Use a helper bot like [@userinfobot](https://t.me/userinfobot) or visit `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates` in your browser to retrieve your `chat_id`.
+   - Paste this ID into `TELEGRAM_CHAT_ID`.
+3. Set `USE_TELEGRAM="true"` in `RS_dragonwilds_backup.sh`.
 
 ---
 
@@ -116,7 +128,7 @@ For more details, check out the [Telegram Bots Getting Started Guide](https://co
    ```bash
    crontab -e
    ```
-   Add a line like this to run every day at midnight:
+   Add a line like this to run the backup daily at midnight:
    ```cron
    0 0 * * * /path/to/RS_dragonwilds_backup.sh >/dev/null 2>&1
    ```
